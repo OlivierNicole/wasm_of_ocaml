@@ -23,6 +23,8 @@ let to_string _ = fail ()
 
 let of_string _ = fail ()
 
-let to_file _ _ = fail ()
+let of_file_no_mappings _ = fail ()
+
+let to_file ?mappings:_ _ ~file:_ = fail ()
 
 let enabled = false
