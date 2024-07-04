@@ -30,27 +30,32 @@ let update_sourcemap ~sourcemap_root ~sourcemap_don't_inline_content sourcemap_f
   if Option.is_some sourcemap_root || not sourcemap_don't_inline_content
   then (
     let open Source_map in
-    let source_map, mappings = Source_map_io.of_file_no_mappings sourcemap_file in
-    assert (List.is_empty (Option.value source_map.sources_content ~default:[]));
+    let source_map =
+      match Source_map_io.of_file sourcemap_file with
+      | `Standard sm -> sm
+      | `Index _ -> failwith "Unexpected index map"
+    in
+    assert (List.is_empty (Option.value source_map.sources_contents ~default:[]));
     (* Add source file contents to source map *)
-    let sources_content =
+    let sources_contents =
       if sourcemap_don't_inline_content
       then None
       else
         Some
           (List.map source_map.sources ~f:(fun file ->
+             Source_map.Source_text.encode (
                if Sys.file_exists file && not (Sys.is_directory file)
                then Some (Fs.read_file file)
-               else None))
+               else None)))
     in
     let source_map =
       { source_map with
-        sources_content
+        sources_contents
       ; sourceroot =
           (if Option.is_some sourcemap_root then sourcemap_root else source_map.sourceroot)
       }
     in
-    Source_map_io.to_file ?mappings source_map ~file:sourcemap_file)
+    Source_map_io.to_file source_map sourcemap_file)
 
 let opt_with action x f =
   match x with

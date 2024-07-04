@@ -138,12 +138,6 @@ let standard_map_of_json json =
       ; sources = Option.value sources ~default:[]
       ; mappings = Option.value mappings ~default:Mappings.empty
       }
-    , if parse_mappings then None else mappings )
-  in
-  match json with
-  | `Assoc (("version", `Float version) :: rest) when int_of_float version = 3 ->
-      parse ~version:3 rest
-  | `Assoc (("version", `Int 3) :: rest) -> parse ~version:3 rest
   | _ -> invalid ()
 
 let to_string m = Yojson.Raw.to_string (json m)
@@ -243,3 +237,5 @@ let of_json = function
   | _ -> invalid_arg "Source_map_io.of_json: map is not an object"
 
 let of_string s = of_json (Yojson.Raw.from_string s)
+
+let of_file filename = of_json (Yojson.Raw.from_file filename)

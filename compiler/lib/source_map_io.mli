@@ -32,3 +32,5 @@ module Index : sig
 end
 
 val of_string : string -> [ `Standard of Source_map.t | `Index of Source_map.Index.t ]
+
+val of_file : string -> [ `Standard of Source_map.t | `Index of Source_map.Index.t ]
