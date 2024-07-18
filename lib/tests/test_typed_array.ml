@@ -116,7 +116,16 @@ let%expect_test "int8" =
   [%expect {||}]
 
 let%expect_test "uint8" =
-  test Setup.Uint8 [| 0; 255 |];
+  let a = [| 0; 255 |] in
+  test Setup.Uint8 a;
+  let ta = from_genarray (ba_of_array Setup.Uint8 a) in
+  let bytes = Typed_array.Bytes.of_uint8Array ta in
+  let ta' = Typed_array.Bytes.to_uint8Array bytes in
+  if ta <> ta' then print_endline "round-trip from uint8Array to bytes and back not equal";
+  let buffer = ta##.buffer in
+  let bytes'' = Typed_array.Bytes.of_arrayBuffer buffer in
+  if bytes'' <> bytes
+  then print_endline "bytes from arrayBuffer not equal to bytes from of_uint8Array";
   [%expect {||}]
 
 let%expect_test "int16" =
