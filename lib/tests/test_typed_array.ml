@@ -140,8 +140,11 @@ let%expect_test "uint8" =
   let a = [| 0; 255 |] in
   test Setup.Uint8 a;
   let ta = from_genarray (type_of_setup Setup.Uint8) (ba_of_array Setup.Uint8 a) in
+  Printf.printf "ta.tag = %d" Obj.(tag (repr ta));
   let bytes = Typed_array.Bytes.of_uint8Array ta in
+  Printf.printf "bytes = %S\n" (Stdlib.Bytes.to_string bytes);
   let ta' = Typed_array.Bytes.to_uint8Array bytes in
+  Printf.printf "ta.tag = %d" Obj.(tag (repr ta'));
   if ta <> ta' then print_endline "round-trip from uint8Array to bytes and back not equal";
   let buffer = ta##.buffer in
   let bytes'' = Typed_array.Bytes.of_arrayBuffer buffer in
