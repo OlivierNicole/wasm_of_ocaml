@@ -30,9 +30,9 @@ module Setup = struct
     | Uint8 : (int, int, Bigarray.int8_unsigned_elt) t
     | Int16 : (int, int, Bigarray.int16_signed_elt) t
     | Uint16 : (int, int, Bigarray.int16_unsigned_elt) t
-    | Int32 : (Js.number Js.t, Int32.t, Bigarray.int32_elt) t
-    | Float32 : (Js.number Js.t, float, Bigarray.float32_elt) t
-    | Float64 : (Js.number Js.t, float, Bigarray.float64_elt) t
+    | Int32 : (Js.number_t, Int32.t, Bigarray.int32_elt) t
+    | Float32 : (Js.number_t, float, Bigarray.float32_elt) t
+    | Float64 : (Js.number_t, float, Bigarray.float64_elt) t
 end
 
 let kind_of_setup : type a b c. (a, b, c) Setup.t -> (b, c) kind = function
@@ -137,7 +137,16 @@ let%expect_test "int8" =
   [%expect {||}]
 
 let%expect_test "uint8" =
-  test Setup.Uint8 [| 0; 255 |];
+  let a = [| 0; 255 |] in
+  test Setup.Uint8 a;
+  let ta = from_genarray (type_of_setup Setup.Uint8) (ba_of_array Setup.Uint8 a) in
+  let bytes = Typed_array.Bytes.of_uint8Array ta in
+  let ta' = Typed_array.Bytes.to_uint8Array bytes in
+  if ta <> ta' then print_endline "round-trip from uint8Array to bytes and back not equal";
+  let buffer = ta##.buffer in
+  let bytes'' = Typed_array.Bytes.of_arrayBuffer buffer in
+  if bytes'' <> bytes
+  then print_endline "bytes from arrayBuffer not equal to bytes from of_uint8Array";
   [%expect {||}]
 
 let%expect_test "int16" =
